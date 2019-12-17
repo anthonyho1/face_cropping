@@ -5,7 +5,6 @@ import numpy as np
 from tkinter import Tk
 from tkinter.filedialog import askdirectory
 import os
-import time
 
 SCALE_FACTOR = 0.05
 
@@ -70,12 +69,9 @@ def main():
 
         img_cropped = image_preprocessing(img)
 
-        start = time.time()
         face = find_faces(img_cropped)
-        end = time.time()
         left, right, top, bot = translate_pts(face)
 
-        print(str(end - start))
         face_img = img[top:bot, left:right]
         cv.imwrite(folder +'/'+ file, face_img)
 
