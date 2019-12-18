@@ -1,9 +1,9 @@
 # Face Cropping
 
-Welcome to face cropping. You'll need a few things. First you'll need Python 3. It may or may not work with Python 2.7+, but I wrote it all in Python 3 and have not tested it with older versions. Google stuff if you don't have Python to get it. You'll also need git to clone this repository, so also google how to get git. 
+Welcome to face cropping. You'll need a few things. First you'll need Python. I think Python 2 will work, but I know Python 3 works. Google stuff if you don't have Python to get it. You'll also need git to clone this repository, so also google how to get git. 
 
 Once you have Python, you'll need to download Numpy and OpenCV. Open up your terminal and run the following commands to download these packages (You probably already have pip from the Python installation):
-~~~
+~~~shell
 pip install numpy
 pip install opencv-python
 ~~~

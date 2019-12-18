@@ -67,11 +67,16 @@ def main():
     files = os.listdir(path)
 
     print("Please select the folder destination")
+    print("Warning! If the images have the same name as any file in the \
+            desination folder, they WILL be overwritten!")
+    
     dest_folder = get_file_path()
-
-    print(dest_folder)
+    
+    print("Destination folder:" + dest_folder)
     uncropped_files = []
     # iterates through all files in folder
+    print("Note: There may or may not be photos that do not get cropped, \
+            a list of file names will be printed at the end if this happens ")
 
     for file in files:
         print(file)
