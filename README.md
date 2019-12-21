@@ -1,6 +1,6 @@
 # Face Cropping
 
-Welcome to face cropping. You'll need a few things. First you'll need Python. I think Python 2 will work, but I know Python 3 works. Google stuff if you don't have Python to get it. You'll also need git to clone this repository, so also google how to get git. 
+Welcome to face cropping. You'll need a few things. First you'll need Python. Both Python 3 and Python 2 will work. Google stuff if you don't have Python to get it. You'll also need git to clone this repository, so also google how to get git. 
 
 Once you have Python, you'll need to download Numpy and OpenCV. Open up your terminal and run the following commands to download these packages (You probably already have pip from the Python installation):
 ~~~shell
@@ -19,6 +19,6 @@ Next we'll need to run the code. Before you run the code, make a folder somewher
 cd ~/face_cropping
 python face_crop.py
 ~~~
-The latter line runs the code. The program will prompt you to choose a folder. The first folder you choose is the source folder with the pictures. After choosing a folder, it will prompt you to choose another folder, which will be your destination folder that you just made. It should start running afterwards.
+The latter line runs the code. The program will prompt you to choose a folder. The first folder you choose is the source folder with the pictures. After choosing a folder, it will prompt you to choose another folder, which will be your destination folder that you just made. It should start running afterwards. The facial detection is based on a simple Haar Cascade using pretrained models provided by OpenCV.
 
 I am still working on the bugs so let me know if there's anything of concern.
