@@ -6,6 +6,8 @@ from tkinter import Tk
 from tkinter.filedialog import askdirectory
 import os
 import time 
+import threading
+import queue
 
 # constants 
 SCALE_FACTOR = 0.05 # Scales image by scale_factor
@@ -13,6 +15,8 @@ HORIZ_STRETCH = 0.75 # The extra factor that is added onto the face bounding box
                      # expand it for the real picture
 TOP_STRETCH = 0.3 # Extra factor that is added to the top of the face bounding box
 BOT_STRETCH = 1.2 # Extra factpr added to bottom of face bounding box
+
+NUM_THREADS = 4
 
 # shows dialog box and prompts user to select folder
 def get_file_path():
@@ -92,7 +96,64 @@ def translate_pts(pts, left_pt, height, width):
     # print(left,right,top,bot)
     return left, right, top, bot # new points for the large image
 
-def main():
+# function that each thread runs
+# takes in destination and each thread's portion of the total files
+# each thread has a fraction of the files to iterate through
+def iterate_files(files, dest_folder, uncropped_files):
+
+    for file in files:
+        print(file)
+        img = cv.imread(path + '/'+ file)
+
+        height, width, _ = img.shape
+        img_cropped, left_pt = image_preprocessing(img)
+
+        face = find_faces(img_cropped)
+
+        # print(face)
+        # if no face in frame, continue and add it to list of uncropped photos
+        if len(face) == 0:
+            uncropped_files.append(file)
+            continue
+        
+        left, right, top, bot = translate_pts(face, left_pt, height, width)
+        face_img = img[top:bot, left:right] # crops photo from points found using translate_pts
+        cv.imwrite(dest_folder +'/'+ file, face_img) # saves photo in destination folder
+
+# main function
+def main(dest_folder):
+    start = time.time()
+
+    num_photos = len(files)
+    files_split = [[]] * NUM_THREADS # file_split splits up total files into several smaller lists for each thread
+    uncropped = [[]] * NUM_THREADS # uncropped images for each thread
+    threads = [] 
+
+    # initializes threads
+    for i in range(NUM_THREADS):
+        files_split[i] = files[i*num_photos//NUM_THREADS:(i+1)*num_photos//NUM_THREADS]
+        threads.append(threading.Thread(target=iterate_files, args=(files_split[i], dest_folder, uncropped[i])))
+        threads[i].start()
+
+    # join threads at the end when they are done their processes
+    for i in range(NUM_THREADS):
+        threads[i].join()
+
+    # prints file names for all uncropped files
+    uncrop = []
+    for files_uncropped in uncropped:
+        if files_uncropped:
+            uncrop.extend(files_uncropped)
+    if uncrop:
+        print("Files that were uncropped: ")
+        print(uncrop)
+
+    # time indicator
+    end = time.time()
+    print('Time elapsed: '+ str(end - start)+ ' s')
+
+if __name__ == '__main__':
+    # user interface, prompt user to select folders
     print("Please select the source folder with the pictures")
     path = get_file_path()
     files = os.listdir(path)
@@ -104,40 +165,9 @@ def main():
     dest_folder = get_file_path()
     
     print("Destination folder:" + dest_folder)
-    uncropped_files = []
+
     # iterates through all files in folder
     print("Note: There may or may not be photos that do not get cropped, \
             a list of file names will be printed at the end if this happens ")
-
-    for file in files:
-        print(file)
-        readtime = time.time()
-        img = cv.imread(path + '/'+ file)
-
-        height, width, _ = img.shape
-        img_cropped, left_pt = image_preprocessing(img)
-
-        start = time.time()
-        face = find_faces(img_cropped)
-        facetime = time.time()
-
-        # print(face)
-        # if no face in frame, continue and add it to list of uncropped photos
-        if len(face) == 0:
-            uncropped_files.append(file)
-            continue
-        
-        left, right, top, bot = translate_pts(face, left_pt, height, width)
-        transtime = time.time()
-        face_img = img[top:bot, left:right] # crops photo from points found using translate_pts
-        cv.imwrite(dest_folder +'/'+ file, face_img) # saves photo in destination folder
-        writetime = time.time()
-
-        print('readtime: '+str(start-readtime) +' facetime: ' + str(facetime-start) + ' transtime: '+str(transtime-facetime)+' writetime: '+str(writetime-transtime))
-    # prints uncropped photos
-    if uncropped_files:
-        print("Files that were uncropped:")
-        print(uncropped_files)
-
-if __name__ == '__main__':
-    main()
+    
+    main(dest_folder)

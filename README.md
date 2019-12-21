@@ -19,6 +19,6 @@ Next we'll need to run the code. Before you run the code, make a folder somewher
 cd ~/face_cropping
 python face_crop.py
 ~~~
-The latter line runs the code. The program will prompt you to choose a folder. The first folder you choose is the source folder with the pictures. After choosing a folder, it will prompt you to choose another folder, which will be your destination folder that you just made. It should start running afterwards. The facial detection is based on a simple Haar Cascade using pretrained models provided by OpenCV.
+The latter line runs the code. The program will prompt you to choose a folder. The first folder you choose is the source folder with the pictures. After choosing a folder, it will prompt you to choose another folder, which will be your destination folder that you just made. It should start running afterwards. The facial detection is based on a simple Haar Cascade using pretrained models provided by OpenCV. The program runs on multiple threads as well, which you can change easily just by changing the constant near the top of the file.
 
-I am still working on the bugs so let me know if there's anything of concern.
+Let me know if there's anything wrong with it.
