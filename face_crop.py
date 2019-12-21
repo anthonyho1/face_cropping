@@ -10,11 +10,16 @@ import threading
 import queue
 
 # constants 
-SCALE_FACTOR = 0.05 # Scales image by scale_factor
+SCALE_FACTOR = 0.075 # Scales image by scale_factor, 0.075 seems to work even with small faces
 HORIZ_STRETCH = 0.75 # The extra factor that is added onto the face bounding box to
                      # expand it for the real picture
 TOP_STRETCH = 0.3 # Extra factor that is added to the top of the face bounding box
-BOT_STRETCH = 1.2 # Extra factpr added to bottom of face bounding box
+BOT_STRETCH = 1.2 # Extra factor added to bottom of face bounding box
+
+#extra cropping of the picture, cuts from the sides and bottom
+BOT_CROP = 0.9
+LEFT_CROP = 0.2
+RIGHT_CROP = 0.8
 
 NUM_THREADS = 4
 
@@ -30,12 +35,11 @@ def image_preprocessing(img):
     w = int(width * SCALE_FACTOR)
 
     top = 0
-    bot = int(h*0.7)
-    left = int(w*0.15)
-    right = int(w*0.85)
+    bot = int(h*BOT_CROP)
+    left = int(w*LEFT_CROP)
+    right = int(w*RIGHT_CROP)
 
     img = cv.resize(img, (w, h)) # returns resized image 
-
 
     return img[top:bot, left:right], left # left is the left point that is cropped, 
                                           # it is added on later when translating the image
@@ -50,16 +54,13 @@ def find_faces(img):
     faces = face_cascade.detectMultiScale(
                     imgray,
                     scaleFactor=1.1, # scale factor is the amount the haar cascade scales
-                    minNeighbors=2, # neighbours is the number of repeated faces it needs to capture for it to be considered a face
+                    minNeighbors=3, # neighbours is the number of repeated faces it needs to capture for it to be considered a face
                     minSize=(int(width*0.15),int(height*0.15))) # min size is the min feature size of face
 
-    # print(int(width*0.1), int(height*0.1))
-    #print(faces)
     face_pts = []
     if len(faces) != 0:
-        face_pts = faces[0] # pretty jank, only take the first face in list, will work on finding best face
+        face_pts = faces[0] # pretty jank, only take the first face in list
         x,y,w,h = face_pts
-        # print(w, h)
 
     return face_pts # returns location of top left coordinate and height/width of bounding box 
 
@@ -84,14 +85,7 @@ def translate_pts(pts, left_pt, height, width):
         bot = height
 
     left = int((left_pt + half_w - length * HORIZ_STRETCH) / SCALE_FACTOR)
-    # if left < 0:
-    #     left = 0
-    #     print('left')
-
     right = int((left_pt + half_w + length * HORIZ_STRETCH) / SCALE_FACTOR)
-    # if right > width:
-    #     right = width
-    #     print('right')
     
     # print(left,right,top,bot)
     return left, right, top, bot # new points for the large image
@@ -99,12 +93,15 @@ def translate_pts(pts, left_pt, height, width):
 # function that each thread runs
 # takes in destination and each thread's portion of the total files
 # each thread has a fraction of the files to iterate through
-def iterate_files(files, dest_folder, uncropped_files):
+def iterate_files(files, dest_folder, path, uncropped_files):
 
     for file in files:
         print(file)
-        img = cv.imread(path + '/'+ file)
+        if file[-4:] != '.jpg' and file[-4:] != '.JPG':
+            continue
 
+        img = cv.imread(path + '/'+ file)
+ 
         height, width, _ = img.shape
         img_cropped, left_pt = image_preprocessing(img)
 
@@ -121,18 +118,19 @@ def iterate_files(files, dest_folder, uncropped_files):
         cv.imwrite(dest_folder +'/'+ file, face_img) # saves photo in destination folder
 
 # main function
-def main(dest_folder):
+def main(dest_folder, path):
     start = time.time()
 
     num_photos = len(files)
     files_split = [[]] * NUM_THREADS # file_split splits up total files into several smaller lists for each thread
-    uncropped = [[]] * NUM_THREADS # uncropped images for each thread
+    uncropped = [[] for _ in range(NUM_THREADS)] # uncropped images for each thread
     threads = [] 
 
     # initializes threads
     for i in range(NUM_THREADS):
         files_split[i] = files[i*num_photos//NUM_THREADS:(i+1)*num_photos//NUM_THREADS]
-        threads.append(threading.Thread(target=iterate_files, args=(files_split[i], dest_folder, uncropped[i])))
+        threads.append(threading.Thread(target=iterate_files, 
+                                        args=(files_split[i], dest_folder, path, uncropped[i])))
         threads[i].start()
 
     # join threads at the end when they are done their processes
@@ -170,4 +168,4 @@ if __name__ == '__main__':
     print("Note: There may or may not be photos that do not get cropped, \
             a list of file names will be printed at the end if this happens ")
     
-    main(dest_folder)
+    main(dest_folder, path)
