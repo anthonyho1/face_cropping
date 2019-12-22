@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import cv2 as cv 
 import numpy as np 
 from tkinter import Tk
@@ -21,7 +19,7 @@ BOT_CROP = 0.9
 LEFT_CROP = 0.2
 RIGHT_CROP = 0.8
 
-NUM_THREADS = 4
+NUM_THREADS = 8
 
 # shows dialog box and prompts user to select folder
 def get_file_path():

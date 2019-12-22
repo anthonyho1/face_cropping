@@ -3,19 +3,18 @@
 Welcome to face cropping. You'll need a few things. First you'll need Python. Both Python 3 and Python 2 will work. Google stuff if you don't have Python to get it. You'll also need git to clone this repository, so also google how to get git. 
 
 Once you have Python, you'll need to download Numpy and OpenCV. Open up your terminal and run the following commands to download these packages (You probably already have pip from the Python installation):
-~~~
-pip install numpy
+~~~ 
+pip install numpy 
 pip install opencv-python
 ~~~
-
-Cool! Next we'll have to get this repository onto your computer. In the terminal, type in this command:
+For Python 3, you may have to use "pip3" instead of "pip". Cool! Next we'll have to get this repository onto your computer. In the terminal, type in this command:
 ~~~
 git clone https://github.com/anthonyho1/face_cropping.git
 ~~~
 This will bring the code onto your local computer. Instead of typing out the URL, you can press the green button that says "Clone or download" in Github to copy the URL. 
 
 Next we'll need to run the code. Before you run the code, make a folder somewhere that will end up being the destination folder. It would be a good idea to not use the source folder, as the new images would overwrite the original images. After making the folder, type the following commands into the terminal:
-~~~
+~~~shell
 cd ~/face_cropping
 python face_crop.py
 ~~~
